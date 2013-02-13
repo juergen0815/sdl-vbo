@@ -49,9 +49,4 @@ void Viewport::Render(long ticks)
 
 }
 
-void Viewport::PostRender()
-{
-}
-
-
 

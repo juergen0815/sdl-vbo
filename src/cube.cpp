@@ -83,12 +83,6 @@ GLfloat colors[]    = { 1, 1, 1,   1, 1, 0,   1, 0, 0,      // v0-v1-v2 (front)
 
 Cube::Cube()
     : m_VboID(0)
-    , m_IsInitialized(false)
-    , m_HasVBO(false)
-
-    , m_NormalArrayEnabled(0)
-    , m_ColorArrayEnabled(0)
-    , m_VertexArrayEnabled(0)
 {
 }
 
@@ -104,83 +98,67 @@ bool Cube::HandleEvent(const SDL_Event& event)
 
 bool Cube::Initialize()
 {
-    m_HasVBO  = glewGetExtension("GL_ARB_vertex_buffer_object");
+    bool m_HasVBO  = glewGetExtension("GL_ARB_vertex_buffer_object");
     ASSERT( m_HasVBO, "VBOs not supported!" );
-    if ( m_HasVBO ) {
-        // create vertex buffer objects, you need to delete them when program exits
-        // Try to put both vertex coords array, vertex normal array and vertex color in the same buffer object.
-        // glBufferDataARB with NULL pointer reserves only memory space.
-        // Copy actual data with 2 calls of glBufferSubDataARB, one for vertex coords and one for normals.
-        // target flag is GL_ARRAY_BUFFER_ARB, and usage flag is GL_STATIC_DRAW_ARB
-        glGenBuffersARB(1, &m_VboID);
-        glBindBufferARB(GL_ARRAY_BUFFER_ARB, m_VboID);
-        glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(vertices)+sizeof(normals)+sizeof(colors), 0, GL_STATIC_DRAW_ARB);
-        glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, 0, sizeof(vertices), vertices);                             // copy vertices starting from 0 offest
-        glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, sizeof(vertices), sizeof(normals), normals);                // copy normals after vertices
-        glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, sizeof(vertices)+sizeof(normals), sizeof(colors), colors);  // copy colours after normals
 
-    }
-    m_IsInitialized = true;
-    return m_IsInitialized;
+    glGenBuffers(1, &m_VboID);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VboID);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices)+sizeof(normals)+sizeof(colors), 0, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);                             // copy vertices starting from 0 offest
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), sizeof(normals), normals);                // copy normals after vertices
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices)+sizeof(normals), sizeof(colors), colors);  // copy colours after normals
+
+    return true;
 }
 
 void Cube::Render(long ticks)
 {
+    int normalArrayEnabled(0);
+    int colorArrayEnabled(0);
+    int vertexArrayEnabled(0);
+
     // save the initial ModelView matrix before modifying ModelView matrix
-//    glPushMatrix();
+    glPushMatrix();
 
-//    // tramsform camera
-//    glTranslatef(0, 0, -m_CameraDistance);
-//    glRotatef(m_CameraAngleX, 1, 0, 0);   // pitch
-//    glRotatef(m_CameraAngleY, 0, 1, 0);   // heading
-
-    // bind VBOs with IDs and set the buffer offsets of the bound VBOs
-    // When buffer object is bound with its ID, all pointers in gl*Pointer()
-    // are treated as offset instead of real pointer.
+    glTranslatef(-5, 1, 0);
+    glRotatef(-5, 1, 0, 0);   // pitch
+    glRotatef(-5, 0, 1, 0);   // heading
 
     // enable vertex arrays
-    glGetIntegerv( GL_NORMAL_ARRAY, &m_NormalArrayEnabled );
-    if ( !m_NormalArrayEnabled )  {
+    glGetIntegerv( GL_NORMAL_ARRAY, &normalArrayEnabled );
+    if ( !normalArrayEnabled )  {
         glEnableClientState(GL_NORMAL_ARRAY);
     }
-    glGetIntegerv( GL_COLOR_ARRAY, &m_ColorArrayEnabled );
-    if ( !m_ColorArrayEnabled) {
+    glGetIntegerv( GL_COLOR_ARRAY, &colorArrayEnabled );
+    if ( !colorArrayEnabled) {
         glEnableClientState(GL_COLOR_ARRAY);
     }
-    glGetIntegerv( GL_VERTEX_ARRAY, &m_VertexArrayEnabled );
-    if (!m_VertexArrayEnabled) {
+    glGetIntegerv( GL_VERTEX_ARRAY, &vertexArrayEnabled );
+    if (!vertexArrayEnabled) {
         glEnableClientState(GL_VERTEX_ARRAY);
     }
 
     // Render with VBO - if available
-    if ( m_HasVBO ) {
-        glBindBufferARB(GL_ARRAY_BUFFER_ARB, m_VboID);
-        // before draw, specify vertex and index arrays with their offsets
-        glNormalPointer(GL_FLOAT, 0, (void*)sizeof(vertices));
-        glColorPointer(3, GL_FLOAT, 0, (void*)(sizeof(vertices)+sizeof(normals)));
-        glVertexPointer(3, GL_FLOAT, 0, 0);
-    } else {
-        // before draw, specify vertex arrays
-        glNormalPointer(GL_FLOAT, 0, normals);
-        glColorPointer(3, GL_FLOAT, 0, colors);
-        glVertexPointer(3, GL_FLOAT, 0, vertices);
-    }
+    glBindBuffer(GL_ARRAY_BUFFER, m_VboID);
+    // before draw, specify vertex and index arrays with their offsets
+    glNormalPointer(GL_FLOAT, 0, (void*)sizeof(vertices));
+    glColorPointer(3, GL_FLOAT, 0, (void*)(sizeof(vertices)+sizeof(normals)));
+    glVertexPointer(3, GL_FLOAT, 0, 0);
+
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    if (!m_VertexArrayEnabled)  {
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    if (!vertexArrayEnabled)  {
         glDisableClientState(GL_VERTEX_ARRAY);  // disable vertex arrays
     }
-    if (!m_ColorArrayEnabled)   {
+    if (!colorArrayEnabled)   {
         glDisableClientState(GL_COLOR_ARRAY);
     }
-    if (!m_NormalArrayEnabled) {
+    if (!normalArrayEnabled) {
         glDisableClientState(GL_NORMAL_ARRAY);
     }
-
-    if ( m_HasVBO ){
-        glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-    }
-//    glPopMatrix();
+    glPopMatrix();
 }
 
 void Cube::PostRender( )

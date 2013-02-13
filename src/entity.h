@@ -57,8 +57,6 @@ protected:
 
 	virtual void Render( long ticks ) = 0;
 
-	virtual void PostRender( ) = 0;
-
 	friend class Renderer;
 };
 

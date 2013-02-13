@@ -26,8 +26,6 @@ private:
     virtual bool HandleEvent( const SDL_Event& event );
 
     virtual void Render( long ticks );
-
-    virtual void PostRender( );
 };
 
 

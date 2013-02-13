@@ -9,49 +9,53 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
-#include <application/app_config.h>
+#include "err.h"
+#include "entity.h"
+#include "vector.h"
 
-#include <render/drawable.h>
+#include <vector>
 
-#include <math/vector4f.h>
-
-#include <boost/shared_ptr.hpp>
-
-namespace shape {
-    class Sphere;
-    typedef boost::shared_ptr<Sphere> SpherePtr;
-
-    class Sphere : public pei::Drawable
-    {
-        int   m_NormalsDplList;
-        float m_Radius;
-        bool  m_ShowNormals;
-
-        std::vector<pei::Vector4f> normalBuffer;
-        std::vector<pei::Vector4f> vertexBuffer;
-
-    public:
-        Sphere( float r  = 1.0f );
-
-        Sphere( float meridians, float parallels );
-
-        virtual ~Sphere();
-
-        void SetRadius( float r ) {
-            m_Radius = r;
-        }
-
-        void ShowNormals( bool showNormals ) {
-            m_ShowNormals = showNormals;
-        }
-
-        virtual bool OnInit( pei::RenderProfilePtr& profile );
-
-    protected:
-        void MakeSphere( float meridians, float parallels );
-
-        virtual void OnDraw( pei::RenderProfilePtr& profile, pei::SurfacePtr& buffer, const pei::RenderParam& param  );
+class Sphere : public Entity
+{
+public:
+    enum {
+        NORMAL,
+        SPECULAR
     };
-}
 
-#endif /* CUBE_H */
+private:
+    int  m_VboID;
+    int  m_IdxBufferID;
+
+    typedef std::vector<Vector> VertexArray;
+    typedef std::vector<Vector> ColorArray;
+    typedef std::vector<unsigned int> IndexArray;
+
+    int         m_Stride;
+    VertexArray m_VertexBuffer; // linear buffer
+    VertexArray m_NormalBuffer; // linear buffer
+    ColorArray  m_ColorBuffer;  // color buffer overlays Vertex Array
+    IndexArray  m_IndexArray;   // standard array to map vertices to tris
+
+    float       m_Radius;
+    Vector      m_Position;
+    Vector      m_Rotation;
+public:
+    Sphere();
+
+    virtual ~Sphere();
+
+private:
+    void MakeSphere( float meridians, float parallels );
+
+protected:
+    virtual bool Initialize( );
+
+    virtual void Render( long ticks );
+
+    virtual bool HandleEvent( const SDL_Event& event ) { return false; }
+
+};
+
+
+#endif /* SPHERE_H */

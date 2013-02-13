@@ -77,7 +77,7 @@ void Renderer::InitGL()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
-    glEnable(GL_CULL_FACE);
+//    glEnable(GL_CULL_FACE);
 
      // track material ambient and diffuse from surface color, call it before glEnable(GL_COLOR_MATERIAL)
     glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
@@ -156,21 +156,16 @@ void Renderer::Run()
             // DONT DO THIS. Just to keep it simple! Use a scene graph instead!
 
             // run list
+            long timeStamp = SDL_GetTicks();
             for( auto& entity : m_RenderList ) {
-                long timeStamp = SDL_GetTicks();
                 if ( entity->AreFlagsSet( Entity::F_ENABLE ) ) {
-                    entity->Render( ticks - timeStamp );
+                    entity->Render( timeStamp - ticks );
                 }
-                ticks -= timeStamp;
             }
-            // unroll list again
-            for ( auto entity = m_RenderList.rbegin(); entity != m_RenderList.rend(); ++entity ) {
-                (*entity)->PostRender();
-            }
-
             // fourth: swap the buffers
             // Swap the buffer
             SDL_GL_SwapBuffers();
+            ticks = timeStamp;
 
             // remove after we are done with the rendering. Can't remove in first list since this would mess up PostRender
             for( auto entity = m_RenderList.begin(); entity != m_RenderList.end(); ) {

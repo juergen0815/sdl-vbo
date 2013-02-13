@@ -15,13 +15,6 @@
 class Cube : public Entity
 {
 	GLuint m_VboID;
-
-	bool   m_IsInitialized;
-	bool   m_HasVBO;
-
-	int    m_NormalArrayEnabled;
-	int    m_ColorArrayEnabled;
-	int    m_VertexArrayEnabled;
 public:
 	Cube();
 

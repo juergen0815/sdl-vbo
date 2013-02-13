@@ -8,8 +8,9 @@
 #ifndef CAMERA_H_
 #define CAMERA_H_
 
-#include "entity.h"
 #include "err.h"
+#include "entity.h"
+#include "vector.h"
 
 class Camera : public Entity
 {
@@ -33,11 +34,9 @@ public:
 private:
     virtual bool HandleEvent( const SDL_Event& event ); // -> ?? override; not working
 
-    virtual bool DoInitialize( Renderer* renderer );
+    virtual bool Initialize( );
 
-    virtual void DoUpdate( float ticks );
-
-    virtual void DoRender( ) {};
+    virtual void Render( long ticks );
 
     float GetJoystickAxisValue( int index );
 };
