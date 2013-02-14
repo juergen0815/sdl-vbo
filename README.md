@@ -15,7 +15,7 @@ Short:
 Description:
 
     Simple example how to use vertex buffer objects in OpenGL with SDL, glew and C++11.
-    
+    Added a sphere and a cylinder (pure vertex arrays). 
     	
 	All sdl-xx-examples are written in C++11 using MinGW gcc 4.6 and are Windows only. I'm using
 	Eclipse Juno as Development IDE.

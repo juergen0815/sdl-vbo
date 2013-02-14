@@ -17,8 +17,8 @@ class App
 {
 	boost::shared_ptr< Worker > m_Worker;
 
-	EntityList m_EventHandlerList;
-    SDL_Joystick    *m_Joystick;
+    SDL_Joystick   *m_Joystick;
+    EntityList      m_EventHandlerList;
 public:
 	App();
 
@@ -29,6 +29,7 @@ public:
 	int Run();
 
 protected:
+
 };
 
 

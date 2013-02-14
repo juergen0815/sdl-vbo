@@ -1,5 +1,5 @@
-#ifndef SPHERE_H
-#define SPHERE_H
+#ifndef CYLINDER_H
+#define CYLINDER_H
 
 #include "err.h"
 #include "entity.h"
@@ -7,7 +7,7 @@
 
 #include <vector>
 
-class Sphere : public Entity
+class Cylinder : public Entity
 {
 public:
     enum {
@@ -31,14 +31,14 @@ private:
 
     float       m_Radius;
     Vector      m_Position;
-    Vector      m_Scale;
     Vector      m_Rotation;
 public:
-    Sphere( float radius = 1.0f );
+    Cylinder();
 
-    virtual ~Sphere();
+    virtual ~Cylinder();
+
 private:
-    void MakeSphere( float meridians, float parallels );
+    void MakeCylinder( float meridians, float parallels );
 
 protected:
     virtual bool Initialize( );
@@ -46,6 +46,8 @@ protected:
     virtual void Render( long ticks );
 
     virtual bool HandleEvent( const SDL_Event& event ) { return false; }
+
 };
 
-#endif /* SPHERE_H */
+
+#endif /* CYLINDER_H */

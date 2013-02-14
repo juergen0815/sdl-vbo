@@ -20,7 +20,7 @@ Camera::Camera( SDL_Joystick* joystick )
     , m_MouseX(0), m_MouseY(0)
     , m_CameraSpeed(1.0)
     , m_CameraAngle( { 0,0,0})
-    , m_CameraPosition( {0,0,30} )
+    , m_CameraPosition( {0,0,10} )
     , m_Joystick(joystick)
 {
 }
@@ -63,7 +63,7 @@ bool Camera::HandleEvent(const SDL_Event& event)
                 m_MouseRightDown = false;
                 m_MouseX = 0;
                 m_MouseY = 0;
-                m_CameraPosition = { 0, 0, 30 };
+                m_CameraPosition = { 0, 0, 10 };
                 m_CameraAngle = { 0, 0, 0 };
                 processed = true;
                 break;
@@ -79,13 +79,13 @@ bool Camera::HandleEvent(const SDL_Event& event)
                 processed = true;
             }
             if ( m_MouseRightDown ) {
-                m_CameraPosition[ Vector::Z ] -= (event.motion.y - m_MouseY) * 0.2f;
+                m_CameraPosition[ Vector::Z ] -= (event.motion.y - m_MouseY) * 0.05f;
                 m_MouseY = event.motion.y;
                 processed = true;
             }
             if ( m_MouseMiddleDown ) {
-                m_CameraPosition[ Vector::X ] -= (event.motion.x - m_MouseX) * 0.2f;
-                m_CameraPosition[ Vector::Y ] -= (event.motion.y - m_MouseY) * 0.2f;
+                m_CameraPosition[ Vector::X ] -= (event.motion.x - m_MouseX) * 0.05f;
+                m_CameraPosition[ Vector::Y ] -= (event.motion.y - m_MouseY) * 0.05f;
                 m_MouseX = event.motion.x;
                 m_MouseY = event.motion.y;
                 processed = true;

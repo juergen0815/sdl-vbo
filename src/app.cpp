@@ -13,6 +13,7 @@
 #include "camera.h"
 #include "cube.h"
 #include "sphere.h"
+#include "cylinder.h"
 
 #include <SDL/SDL.h>
 
@@ -23,6 +24,7 @@
 
 App::App()
     : m_Worker(new Renderer)
+    , m_Joystick(nullptr)
 {
 }
 
@@ -49,7 +51,7 @@ void App::Init(int argc, char* argv[])
     err = SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     ASSERT( err != -1, "Error enabling multi sampling! SDL Error: %s\n", SDL_GetError());
 
-    int numSampleBuffers(2); // test what's the max AA. test 8xMSAA
+    int numSampleBuffers(4); // test what's the max AA. test 8xMSAA
     err = SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, numSampleBuffers);
     ASSERT( err != -1, "Error setting number (%d) of AA buffer! SDL Error: %s\n", numSampleBuffers, SDL_GetError());
 
@@ -80,8 +82,8 @@ int App::Run()
     // somebody must attach a worker
     BOOST_ASSERT( m_Worker);
 
-    int width(640);
-    int height(480);
+    int width(960);
+    int height(544);
     SDL_Surface *screen;
     screen = SDL_SetVideoMode(width, height, 32, SDL_OPENGL);
     if (screen == NULL)
@@ -114,7 +116,12 @@ int App::Run()
     // this entity renders
     renderer->AddEntity(cube, order++);
 
-    // Add a cube
+    // Add a cylinder
+    EntityPtr cylinder(new Cylinder);
+    // this entity renders
+    renderer->AddEntity(cylinder, order++);
+
+    // Add a sphere
     EntityPtr sphere(new Sphere);
     // this entity renders
     renderer->AddEntity(sphere, order++);
