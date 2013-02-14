@@ -11,13 +11,14 @@ class Cylinder : public Entity
 {
 public:
     enum {
-        NORMAL,
-        SPECULAR
+        VERTEX_BUFFER = 0,
+        INDEX_BUFFER,
+
+        MAX_BUFFERS
     };
 
 private:
-    int  m_VboID;
-    int  m_IdxBufferID;
+    int m_Buffers[ MAX_BUFFERS ];
 
     typedef std::vector<Vector> VertexArray;
     typedef std::vector<Vector> ColorArray;
