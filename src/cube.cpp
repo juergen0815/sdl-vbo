@@ -7,7 +7,6 @@
  */
 
 #include "cube.h"
-#include "err.h"
 
 // cube ///////////////////////////////////////////////////////////////////////
 //    v6----- v5
@@ -83,6 +82,9 @@ GLfloat colors[]    = { 1, 1, 1,   1, 1, 0,   1, 0, 0,      // v0-v1-v2 (front)
 
 Cube::Cube()
     : m_VboID(0)
+    , m_Position( { -5, -1, 0 } )
+    , m_Scale( { 1,1,1 } )
+    , m_Rotation( { 0,0,0,0 } )
 {
 }
 
@@ -120,9 +122,14 @@ void Cube::Render(long ticks)
     // save the initial ModelView matrix before modifying ModelView matrix
     glPushMatrix();
 
-    glTranslatef(-5, 1, 0);
-    glRotatef(-5, 1, 0, 0);   // pitch
-    glRotatef(-5, 0, 1, 0);   // heading
+    m_Rotation[ Vector::X ] -= 45.0f * float(ticks) / 1000.0f;
+    m_Rotation[ Vector::Y ] += 45.0f * float(ticks) / 1000.0f;
+
+    glTranslatef( m_Position[Vector::X], m_Position[Vector::Y], m_Position[Vector::Z] );
+    glScalef( m_Scale[Vector::X], m_Scale[Vector::Y], m_Scale[Vector::Z] );
+    glRotatef( m_Rotation[ Vector::X ], 1, 0, 0);
+    glRotatef( m_Rotation[ Vector::Y ], 0, 1, 0);
+    glRotatef( m_Rotation[ Vector::Z ], 0, 0, 1);
 
     // enable vertex arrays
     glGetIntegerv( GL_NORMAL_ARRAY, &normalArrayEnabled );
@@ -159,9 +166,4 @@ void Cube::Render(long ticks)
         glDisableClientState(GL_NORMAL_ARRAY);
     }
     glPopMatrix();
-}
-
-void Cube::PostRender( )
-{
-
 }

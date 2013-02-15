@@ -8,13 +8,19 @@
 #ifndef CUBE_H_
 #define CUBE_H_
 
+#include "err.h"
 #include "entity.h"
+#include "vector.h"
 
 #include <GL/glew.h>
 
 class Cube : public Entity
 {
 	GLuint m_VboID;
+
+    Vector m_Position;
+    Vector m_Scale;
+    Vector m_Rotation;
 public:
 	Cube();
 
@@ -26,9 +32,6 @@ private:
 
 	virtual void Render( long ticks );
 
-    virtual void PostRender( );
-
 };
-
 
 #endif /* CUBE_H_ */

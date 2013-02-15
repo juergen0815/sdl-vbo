@@ -6,8 +6,8 @@
 
 #include <boost/filesystem.hpp>
 
-const int columns = 32;
-const int rows    = 2;
+const int _columns = 32;
+const int _rows    = 2;
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -16,9 +16,10 @@ const int rows    = 2;
 Cylinder::Cylinder( )
     : m_Buffers( { -1 } )
     , m_Stride(1) // needed if/when we pack color + vertex into one array
-    , m_VertexBuffer( columns*rows*m_Stride )    // use the same memory pool for vertex and texture coords
-    , m_ColorBuffer( columns*rows*m_Stride )
     , m_Radius(1.0f)
+    , m_Position( {  +5, 1, 0 } )
+    , m_Scale( { 1,1,1 } )
+    , m_Rotation( { 0,0,0,0 } )
 {
 }
 
@@ -35,7 +36,8 @@ void Cylinder::MakeCylinder( float columns, float rows )
     const float RAD360 = M_PI*2; // 2*PI in RAD
 
     int lastColumn = columns - 1;
-    int lastRow = rows - 1;
+    int lastRow = rows;
+    ++rows; // one extra row to top off the poly
 
     // Add two extra vertices at center bottom and top
     m_VertexBuffer.resize( columns*rows*m_Stride + 2 );
@@ -52,10 +54,10 @@ void Cylinder::MakeCylinder( float columns, float rows )
     int looper(0);
 
     // need one extra ring to close the gap (overlaps 0)
-    double segmentSize  = RAD360/columns;
+    float segmentSize  = RAD360/columns;
     for( float y = 0; y < rows; ++y ){  // must <= because 2 "rows" are actually 3 vertex rings
         std::vector< Vector > segments;
-        float vpy = y / rows * height - height/2;
+        float vpy = y / lastRow * height - height/2;
         for( float x = 0; x < columns; ++x ) { //0-2PI
             float phi = x * segmentSize;
             // vertex
@@ -71,10 +73,10 @@ void Cylinder::MakeCylinder( float columns, float rows )
 
             // vertex color
             auto& color = *cit; ++cit;
-            color = { 1.0f, 1.0f, 1.0f, 1.0f };
+            color = { 1.0f - y/rows, 1.0f, y/rows, 1.0f };
 
             // skip last column/row - already indexed
-            if ( y < rows ) {
+            if ( y < lastRow ) {
                 // vertices don't need to be set just yet. We just index them here
 
                 // top tri
@@ -93,13 +95,13 @@ void Cylinder::MakeCylinder( float columns, float rows )
     }
 
     // we share vertices with first and last ring -> problem with normals. This point away from center, only center is correct
-    auto& vertex = *vit; ++vit;
-    vertex = { 0,-height/2, 0 };   // bottom - center
-    auto& normal = *nit; ++nit;
-    normal = { 0, -1, 0 };       // point down
-    auto& color = *cit; ++cit;
-    color = { 1.0f, 0.0f, 0.0f, 1.0f };
-    int bottomIdx = rows;
+    auto& vb = *vit; ++vit;
+    vb = { 0,-height/2, 0 };   // bottom - center
+    auto& nb = *nit; ++nit;
+    nb = { 0, -1, 0 };         // point down
+    auto& cb = *cit; ++cit;
+    cb = { 1.0f, 1.0f, 0.0f, 1.0f };
+    int bottomIdx = columns * rows * m_Stride;
     // close top and bottom
     for( int x = 0; x < columns; ++x ) { //0-2PI
         // bottom
@@ -108,22 +110,18 @@ void Cylinder::MakeCylinder( float columns, float rows )
         idx = (x + 1) % lastColumn; m_IndexArray[ looper++ ] = idx;  // 1x0
         idx = bottomIdx;            m_IndexArray[ looper++ ] = idx;  // 1x1 - bottom row
     }
-
-    vertex = *vit; ++vit;
-    vertex = { 0, height/2, 0 };   // top - center
-    normal = *nit; ++nit;
-    normal = { 0, +1, 0 };       // point up
-    color = *cit; ++cit;
-    color = { 0.0f, 0.0f, 1.0f, 1.0f };
-    int topIdx    = rows+1;
-
+    auto& vt = *vit; ++vit;
+    vt = { 0, height/2, 0 };   // top - center
+    auto& nt = *nit; ++nit;
+    nt = { 0, +1, 0 };       // point up
+    auto& ct = *cit; ++cit;
+    ct = { 0.0f, 1.0f, 1.0f, 1.0f };
+    int topIdx = bottomIdx+1;
     for( int x = 0; x < columns; ++x ) { //0-2PI
-        // top
-        int x1 = x + columns * (rows-1);
         int
-        idx = (x1 + 1) % lastColumn; m_IndexArray[ looper++ ] = idx;  // 1x0
-        idx = (x1 + 0) % lastColumn; m_IndexArray[ looper++ ] = idx;  // 0x0 - readability!
-        idx = topIdx;                m_IndexArray[ looper++ ] = idx;  // 1x1 - bottom row
+        idx = (x + 1) % lastColumn + columns*lastRow; m_IndexArray[ looper++ ] = idx;  // 1x0
+        idx = (x + 0) % lastColumn + columns*lastRow; m_IndexArray[ looper++ ] = idx;  // 0x0 - readability!
+        idx = topIdx;               m_IndexArray[ looper++ ] = idx;  // 1x1 - bottom row
     }
 }
 
@@ -133,7 +131,7 @@ bool Cylinder::Initialize()
     ASSERT( hasVBO, "VBOs not supported!" );
 
     // we might just want to create this in DoInitialize - and throw away the data we don't need locally
-    MakeCylinder( columns, rows );
+    MakeCylinder( _columns, _rows );
 
     glGenBuffers( MAX_BUFFERS, (GLuint*)m_Buffers);
 
@@ -171,9 +169,11 @@ void Cylinder::Render( long ticks )
 
     m_Rotation[ Vector::X ] += 25.0f * float(ticks) / 1000.0f;
 
-    glTranslatef( +5, 1, 0);
-    glRotatef( m_Rotation[ Vector::X ], 1, 0, 0);   // pitch
-    glRotatef( 0, 0, 1, 0);   // heading
+    glTranslatef( m_Position[Vector::X], m_Position[Vector::Y], m_Position[Vector::Z] );
+    glScalef( m_Scale[Vector::X], m_Scale[Vector::Y], m_Scale[Vector::Z] );
+    glRotatef( m_Rotation[ Vector::X ], 1, 0, 0);
+    glRotatef( m_Rotation[ Vector::Y ], 0, 1, 0);
+    glRotatef( m_Rotation[ Vector::Z ], 0, 0, 1);
 
     int vertexArrayEnabled;
     glGetIntegerv( GL_VERTEX_ARRAY, &vertexArrayEnabled );

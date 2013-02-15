@@ -32,6 +32,7 @@ private:
 
     float       m_Radius;
     Vector      m_Position;
+    Vector      m_Scale;
     Vector      m_Rotation;
 public:
     Cylinder();
