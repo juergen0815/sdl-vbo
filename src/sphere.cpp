@@ -6,8 +6,8 @@
 
 #include <boost/filesystem.hpp>
 
-const int columns = 32;
-const int rows    = 12;
+const int sCcolumns = 32;
+const int sRows    = 12;
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f
@@ -29,15 +29,15 @@ Sphere::Sphere( float radius /* = 1.0f */ )
     : m_VboID(-1)
     , m_IdxBufferID(-1)
     , m_Stride(1) // needed if/when we pack color + vertex into one array
-    , m_VertexBuffer( columns*rows*m_Stride )    // use the same memory pool for vertex and texture coords
-    , m_ColorBuffer( columns*rows*m_Stride )
+    , m_VertexBuffer( sCcolumns*sRows*m_Stride )    // use the same memory pool for vertex and texture coords
+    , m_ColorBuffer( sCcolumns*sRows*m_Stride )
     , m_Radius(radius)
     , m_Position( { 0, 0, 3 } )
     , m_Scale( { 1,1,1 } )
     , m_Rotation( { 0,0,0,0 } )
 {
     // we might just want to create this in DoInitialize - and throw away the data we don't need locally
-    MakeSphere( columns, rows );
+    MakeSphere( sCcolumns, sRows );
 }
 
 Sphere::~Sphere()
