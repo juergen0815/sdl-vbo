@@ -14,8 +14,11 @@
 #include <list>
 
 #include <boost/shared_ptr.hpp>
-
-
+#include <GL/glew.h>
+#ifdef __linux__
+#include <GL/glx.h>
+#endif
+#include <SDL/SDL_syswm.h>
 
 class Renderer : public Worker
 {
@@ -25,8 +28,13 @@ class Renderer : public Worker
 	EntityList m_RenderList;
 	EntityList m_DestroyList;
 
-	HGLRC m_CurrentContext;
-	HDC   m_CurrentDC;
+#ifdef _WIN32
+	HGLRC       m_CurrentContext;
+	HDC         m_CurrentDC;
+#endif
+#ifdef __linux__
+	GLXContext   m_CurrentContext;
+#endif
 
 public:
 	Renderer();

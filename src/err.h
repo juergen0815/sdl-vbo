@@ -24,4 +24,6 @@ void ShowWindowsError( const char* msg, unsigned long err, const char* header = 
 
 void ShowError( const char* msg, const char* header = "Error!" );
 
+const char* glErrMessage( int code );
+
 #endif /* ERR_H_ */
